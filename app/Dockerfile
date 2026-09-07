@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3-eclipse-temurin-26 AS build
 WORKDIR /build
 COPY pom.xml .
 # `maven_settings` is optional: pass `--secret id=maven_settings,src=$HOME/.m2/settings.xml`
