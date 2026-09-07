@@ -1,0 +1,33 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom" th:fragment="topnav"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div class="sidebar-heading"><strong><u>RentHub</u> 🏠</strong></div>
+
+    <button class="btn btn-link text-secondary" id="menu-toggle">Меню</button>
+
+    <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключить навигацию"
+            class="navbar-toggler"
+            data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+            <li class="nav-item">
+                <a class="nav-link" href="/login" sec:authorize="!hasRole('EMPLOYEE')">Войти</a>
+            </li>
+            <li class="nav-item" sec:authorize="hasRole('EMPLOYEE')">
+                <span class="nav-link active">
+                    <span style="display: inline;"><i class='fas fa-user-circle'></i></span>
+                    <a class="nav-link" style="display: inline;"
+                       th:text="'Привет, ' + ${#authentication.name}"></a>
+                </span>
+            </li>
+            <li class="nav-item" sec:authorize="hasRole('EMPLOYEE')">
+                <a class="nav-link" href="/logout"
+                   onclick="return confirm('Вы уверены?\nВсе несохраненные данные будут потеряны!');">
+                    Выйти
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

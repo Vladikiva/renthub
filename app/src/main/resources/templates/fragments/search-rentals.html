@@ -1,0 +1,143 @@
+<div layout:decorate="~{index}" layout:fragment="content">
+    <style>
+        .search-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+        }
+
+        .img-thumbnail {
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 0.25rem;
+            background-color: #fff;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .form-select-sm {
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #ced4da;
+            transition: all 0.3s ease;
+        }
+
+        .form-select-sm:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 0.2rem rgba(74,144,226,0.25);
+        }
+
+        .btn-primary {
+            background-color: #4a90e2;
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #357ABD;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .houses-table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f0f7ff;
+        }
+
+        .info {
+            color: #4a90e2;
+            font-weight: 500;
+        }
+
+        .card {
+            transition: transform 0.3s;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 576px) {
+            .form-control-sm {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">Поиск помещений</h1>
+            <p class="lead text-muted">Выберите город и найдите подходящие помещения</p>
+        </div>
+
+        <div class="search-container mx-auto mb-5">
+            <form action="/" method="post" th:object="${selectedStationBean}">
+                <div class="row g-3 align-items-center mb-4">
+                    <label class="col-sm-2 col-form-label fw-semibold" for="station">Выберите город</label>
+                    <div class="col-sm-10">
+                        <select class="form-select form-select-sm" id="station" th:field="*{station}">
+                            <option th:each="station : ${stations}"
+                                    th:text="${station.city}"
+                                    th:value="${station.id}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-10 offset-sm-2">
+                        <button class="btn btn-primary btn-lg" type="submit">
+                            <i class="bi bi-search"></i> Найти помещений
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div th:if="${houses != null}" class="card houses-table">
+            <div th:switch="${housesListSize}" th:with="housesListSize=${#lists.size(houses)}">
+                <div class="card-body text-center py-5" th:case="0">
+                    <i class="bi bi-house-dash display-4 text-muted mb-3"></i>
+                    <p class="fs-5 mb-0">В этом городе нет доступных помещений</p>
+                </div>
+
+                <div th:case="*">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Фото</th>
+                                <th>Номер дома</th>
+                                <th>Цена</th>
+                                <th>Адрес</th>
+                                <th>Комнат</th>
+                                <th>Город</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="house : ${houses}">
+                                <td>
+                                    <img th:src="${house.imageUrl}" alt="Фото помещения" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                                </td>
+                                <td th:text="${house.houseNr}"></td>
+                                <td th:text="${house.price} + ' ₽'"></td>
+                                <td th:text="${house.street}"></td>
+                                <td th:text="${house.model}"></td>
+                                <td th:text="${house.station?.city}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer bg-white border-top text-end">
+                        <span class="fs-6" th:text="${housesListSize + (housesListSize == 1 ? ' дом найден' : ' дома найдено')}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

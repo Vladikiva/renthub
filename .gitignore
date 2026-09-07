@@ -1,0 +1,23 @@
+# Build output
+target/
+build/
+*.jar
+*.war
+*.log
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+
+# Local secrets / env
+.env
+*.local.env

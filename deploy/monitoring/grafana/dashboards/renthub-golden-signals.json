@@ -1,0 +1,108 @@
+{
+  "uid": "renthub-golden-signals",
+  "title": "RentHub / Golden signals",
+  "tags": ["renthub", "sre"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Availability (non-5xx ratio, 5m)",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 0.99 },
+              { "color": "green", "value": 0.999 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "1 - (sum(rate(http_server_requests_seconds_count{job=\"renthub\",status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_server_requests_seconds_count{job=\"renthub\"}[5m])), 0.0001))",
+          "legendFormat": "availability"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Traffic (req/s by status)",
+      "gridPos": { "h": 9, "w": 9, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(http_server_requests_seconds_count{job=\"renthub\"}[5m]))",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency (seconds)",
+      "gridPos": { "h": 9, "w": 9, "x": 15, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "s" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"renthub\"}[5m])))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"renthub\"}[5m])))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_requests_seconds_bucket{job=\"renthub\"}[5m])))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Running rentals",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 5 },
+      "targets": [{ "expr": "sum(renthub_rentals_running{job=\"renthub\"})", "legendFormat": "running" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Business events (per hour)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "targets": [
+        {
+          "expr": "sum(increase(renthub_rentals_created_total{job=\"renthub\"}[1h]))",
+          "legendFormat": "created"
+        },
+        {
+          "expr": "sum(increase(renthub_rentals_finished_total{job=\"renthub\"}[1h]))",
+          "legendFormat": "finished"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Saturation: JVM heap and DB pool",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "targets": [
+        {
+          "expr": "sum by (instance) (jvm_memory_used_bytes{job=\"renthub\",area=\"heap\"}) / sum by (instance) (jvm_memory_max_bytes{job=\"renthub\",area=\"heap\"})",
+          "legendFormat": "heap used ratio"
+        },
+        {
+          "expr": "hikaricp_connections_active{job=\"renthub\"} / hikaricp_connections_max{job=\"renthub\"}",
+          "legendFormat": "db pool used ratio"
+        },
+        {
+          "expr": "hikaricp_connections_pending{job=\"renthub\"}",
+          "legendFormat": "db pool pending"
+        }
+      ]
+    }
+  ]
+}

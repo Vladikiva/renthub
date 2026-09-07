@@ -1,0 +1,70 @@
+groups:
+  - name: renthub-availability
+    rules:
+      - alert: RenthubDown
+        expr: up{job="renthub"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: RentHub instance is not scrapeable
+          runbook_url: https://github.com/Vladikiva/renthub/blob/main/docs/runbook.md#renthubdown
+
+      - alert: RenthubHighErrorRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{job="renthub",status=~"5.."}[5m]))
+            /
+          sum(rate(http_server_requests_seconds_count{job="renthub"}[5m])) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: More than 1% of requests fail with 5xx (SLO burn)
+          runbook_url: https://github.com/Vladikiva/renthub/blob/main/docs/runbook.md#renthubhigherrorrate
+
+      - alert: RenthubHighLatency
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum by (le) (rate(http_server_requests_seconds_bucket{job="renthub"}[5m]))
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: p99 latency above the 500ms SLO
+          runbook_url: https://github.com/Vladikiva/renthub/blob/main/docs/runbook.md#renthubhighlatency
+
+  - name: renthub-resources
+    rules:
+      - alert: RenthubConnectionPoolSaturated
+        expr: hikaricp_connections_pending{job="renthub"} > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Threads are waiting for a database connection
+          runbook_url: https://github.com/Vladikiva/renthub/blob/main/docs/runbook.md#renthubconnectionpoolsaturated
+
+      - alert: RenthubHeapPressure
+        expr: |
+          sum by (instance) (jvm_memory_used_bytes{job="renthub",area="heap"})
+            /
+          sum by (instance) (jvm_memory_max_bytes{job="renthub",area="heap"}) > 0.9
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: JVM heap usage above 90%
+          runbook_url: https://github.com/Vladikiva/renthub/blob/main/docs/runbook.md#renthubheappressure
+
+  - name: renthub-business
+    rules:
+      - alert: RenthubNoRentalsCreated
+        expr: sum(increase(renthub_rentals_created_total{job="renthub"}[1h])) == 0
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: No rental has been created in the last hour
+          runbook_url: https://github.com/Vladikiva/renthub/blob/main/docs/runbook.md#renthubnorentalscreated
