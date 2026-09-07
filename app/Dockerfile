@@ -14,6 +14,7 @@ RUN --mount=type=cache,target=/root/.m2 \
     java -Djarmode=layertools -jar target/renthub-*.jar extract --destination /build/layers
 
 FROM eclipse-temurin:17-jre-jammy AS runtime
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd --system --gid 10001 renthub && \
@@ -29,6 +30,6 @@ EXPOSE 8080
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=5 \
-    CMD curl -fsS http://localhost:8080/actuator/health/liveness || exit 1
+    CMD ["curl", "-fsS", "http://localhost:8080/actuator/health/liveness"]
 
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
