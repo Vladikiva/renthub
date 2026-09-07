@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: renthub-config
+data:
+  SPRING_PROFILES_ACTIVE: "k8s"
+  DB_URL: "jdbc:postgresql://postgres:5432/renthub"
+  DB_POOL_MAX: "20"
+  DB_POOL_MIN: "5"
+  TOMCAT_MAX_THREADS: "150"
+  TRACING_SAMPLE_RATE: "0.1"
+  APP_ENVIRONMENT: "production"
+  LOG_LEVEL_ROOT: "INFO"

@@ -1,0 +1,30 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: default
+  group_by: ["alertname", "severity"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - matchers:
+        - severity = "critical"
+      receiver: pager
+      repeat_interval: 1h
+
+receivers:
+  - name: default
+  - name: pager
+    # Replace with a real integration (PagerDuty/Slack/Telegram) and inject the
+    # secret via environment variables or a Kubernetes secret.
+    webhook_configs:
+      - url: http://localhost:5001/alerts
+        send_resolved: true
+
+inhibit_rules:
+  - source_matchers:
+      - severity = "critical"
+    target_matchers:
+      - severity = "warning"
+    equal: ["alertname", "instance"]
