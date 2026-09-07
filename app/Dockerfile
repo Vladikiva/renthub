@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -ntp -DskipTests package && \
     java -Djarmode=layertools -jar target/renthub-*.jar extract --destination /build/layers
 
-FROM eclipse-temurin:17-jre-jammy AS runtime
+FROM eclipse-temurin:25-jre-jammy AS runtime
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/* && \
